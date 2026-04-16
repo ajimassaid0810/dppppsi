@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\KotaKab;
 use App\Models\Kecamatan;
-use App\Models\Kelurahan;
+use App\Models\Pagoruan;
 use Illuminate\Http\Request;
 
 class WilayahController extends Controller
@@ -12,12 +12,12 @@ class WilayahController extends Controller
     public function getKotaKab($provinsiId)
     {
         return KotaKab::where('provinsi_id', $provinsiId)
-            ->select('id', 'nama')
+            ->select('id', 'kode', 'nama')
             ->orderBy('nama')
             ->get();
     }
 
-   public function getKecamatan(Request $request, $kotaKabId)
+    public function getKecamatan(Request $request, $kotaKabId)
 {
     $paginate = $request->boolean('paginate', true); // default true
     $perPage = $request->input('per_page', 10);
@@ -49,11 +49,16 @@ class WilayahController extends Controller
     }
 }
 
-    public function getKelurahan($kecamatanId)
+    public function getPagoruan($kecamatanId)
     {
-        return Kelurahan::where('kecamatan_id', $kecamatanId)
-            ->select('id', 'nama')
+        return Pagoruan::where('kecamatan_id', $kecamatanId)
+            ->select('id', 'kode', 'nama')
             ->orderBy('nama')
             ->get();
+    }
+
+    public function getKelurahan($kecamatanId)
+    {
+        return $this->getPagoruan($kecamatanId);
     }
 }

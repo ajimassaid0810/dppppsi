@@ -2,80 +2,54 @@
   <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4 cetak">
     <div id="print-area">
       <div class="cards-container">
-        <!-- Kartu Depan -->
         <div class="card depan">
           <div class="background" :style="{ backgroundImage: `url(${frontBackgroundUrl})` }"></div>
 
           <div class="top-section">
-            <!-- <img :src="logoUrl" class="logo" /> -->
-            <div class="header-text">
-              <!-- <h1 class="text-lg ">Dewan Pimpinan Pusat</h1>
-              <h2 class="font-bold">Persatuan Pencak Silat Indonesia</h2> -->
-            </div>
+            <div class="header-text"></div>
           </div>
 
           <div class="middle-section">
-
-           
-            <div>
-                <div class="foto" v-if="anggota.foto">
-                   <img :src="anggota.foto ? `/storage/${anggota.foto}` : '/storage/images/default.png'"  />
-                </div>
+            <div class="photo-wrap">
+              <div class="foto" v-if="anggota.foto_url">
+                <img :src="anggota.foto_url" />
+              </div>
+              <div v-else class="foto foto-empty">Foto</div>
             </div>
-            
-            <div class="qr-section">
-           
-                    <table>
-                    <tr><td>No Anggota</td><td>: {{ anggota.nik }}</td></tr>
-                    <tr><td>Nama</td><td>: {{ anggota.nama_lengkap }}</td></tr>
-        
-                    <tr><td>DPD Kota/Kab</td><td>: {{ anggota.kelurahan?.kecamatan?.kota_kab?.nama ?? '-' }}</td></tr>
 
-                    </table>
-             
-              
+            <div class="content-wrap">
+              <div class="identity">
+                <h1 class="member-name">{{ anggota.nama_lengkap }}</h1>
+                <p class="member-number">{{ anggota.nomor_anggota }}</p>
+              </div>
+
+              <div class="qr-wrap">
+                <QrcodeVue :value="publicUrl" :size="66" :margin="1" level="M" />
+                <p class="qr-text">Scan untuk cek keaslian anggota</p>
+              </div>
             </div>
-           <diV class="space">
-            <QrcodeVue :value="`http://localhost:8000/anggota/${anggota.id}/print`" :size="80" />
-           </diV>
           </div>
         </div>
 
-        <!-- Kartu Belakang -->
         <div class="card belakang">
           <div class="background" :style="{ backgroundImage: `url(${backBackgroundUrl})` }"></div>
 
-          <!-- <h3 class="font-bold mb-4">CIRI ANGGOTA PPSI</h3>
-          <p class="text-black">Perkataan dan perbuatan selalu sesuai dengan:</p>
-          <ul>
-            <li>Trilogi PPSI: Budi - Bakti - Sakti </li>
-            <li>Tekad PPSI: Panceg na Galur, Akur Jeung Dulur, Ngajaga Lembur</li>
-            <li>Papagon PPSI: Sholat - Silat - Siliwangi</li>
-          </ul> -->
-
           <div class="ttd">
             <div>
-                
-                <p>Ketua Umum DPP PPSI </p>
-                <div style="height: 12mm;">
-
-                </div>
-                <p class="name">Galih Santika Fadillahkusumah, S.S., M.Si </p>
+              <p>Ketua Umum DPP PPSI </p>
+              <div style="height: 12mm;"></div>
+              <p class="name">Galih Santika Fadillahkusumah, S.S., M.Si </p>
             </div>
             <div>
-                <p>Ketua DPW PPSI <br> Provinsi Kalimatan Tengah</p>
-                <div style="height: 8mm;">
-                     
-                </div>
-                 <p class="font-light">Aulia Ibrahim</p>
+              <p>Ketua DPW PPSI <br> Provinsi Kalimatan Tengah</p>
+              <div style="height: 8mm;"></div>
+              <p class="font-light">Aulia Ibrahim</p>
             </div>
-            
-
           </div>
         </div>
       </div>
 
-      <button @click="window.print()" class="btn-print">🖨 Cetak</button>
+      <button @click="window.print()" class="btn-print">Cetak</button>
     </div>
   </div>
 </template>
@@ -86,54 +60,28 @@ import { defineAsyncComponent } from 'vue'
 
 const QrcodeVue = defineAsyncComponent(() => import('qrcode.vue'))
 
-interface Cabang {
-  id: string
-  nama_cabang: string
-}
-
 interface Anggota {
   id: string
+  nomor_anggota: string
   nama_lengkap: string
-  nik: string
-  tanggal_lahir: string
-  alamat: string | null
-  telepon: string | null
-  perguruan: string | null
-  golongan_darah: string | null
-  masa_berlaku: string | null
-  tanggal_gabung: string
-  cabang?: Cabang
-  kelurahan?: {
-    id: string
-    nama: string
-    kecamatan?: {
-      nama: string
-      kota_kab?: {
-        nama: string
-        provinsi?: {
-          nama: string
-        }
-      }
-    }
-  } | null
-  foto?: string | null
+  foto_path?: string | null
+  foto_url?: string | null
 }
 
-const page = usePage<{ anggota: Anggota }>()
+const page = usePage<{ anggota: Anggota; publicUrl: string }>()
 const anggota = page.props.anggota
+const publicUrl = page.props.publicUrl
 
-const logoUrl = '/storage/images/logo.png'
 const frontBackgroundUrl = '/storage/images/front.png'
 const backBackgroundUrl = '/storage/images/back.png'
 </script>
 
 <style>
-.cetak{
-    font-family: 'League Gothic', sans-serif;
-    font-weight: lighter;
-  
-    
+.cetak {
+  font-family: 'League Gothic', sans-serif;
+  font-weight: lighter;
 }
+
 #print-area {
   display: flex;
   flex-direction: column;
@@ -147,7 +95,6 @@ const backBackgroundUrl = '/storage/images/back.png'
   flex-wrap: wrap;
 }
 
-/* Kartu */
 .card {
   width: 85.6mm;
   height: 54mm;
@@ -163,70 +110,41 @@ const backBackgroundUrl = '/storage/images/back.png'
   background-color: white;
 }
 
-/* Background gambar */
 .card .background {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background-size: cover;
   background-position: center;
   z-index: 0;
 }
 
-/* Top section */
 .top-section {
-    height: 20mm;
-  display: flex;
-  align-items: center;
-  gap: 4mm;
+  height: 11mm;
+  position: relative;
   z-index: 1;
 }
 
-.card .logo {
-  width: 10mm;
-  height: auto;
-}
-
-.header-text {
-  line-height: 1;
-  letter-spacing: 0.5;
-  font-size: 7pt;
-  text-transform: uppercase;
-}
-.header-text h2{
-    font-size: 9.2pt;
-}
-.header-text h1{
-    font-weight: bolder;
-}
-
-/* Middle section */
 .middle-section {
-  padding: 0 5mm 0 8mm;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 3mm;
+  position: relative;
   z-index: 1;
-}
-.middle-section .space{
- 
-     margin-top: -2.5mm;
-  margin-left: -12mm;
+  padding: 0 4.5mm 0 6mm;
+  display: flex;
+  gap: 3.5mm;
+  align-items: center;
+  height: 33mm;
 }
 
-td{
-    min-width: 10mm;
+.photo-wrap {
+  flex: 0 0 16mm;
 }
 
 .card.depan .foto {
-  width: 15mm;
-  height: 20mm;
-  margin-top: -4mm;
+  width: 16mm;
+  height: 21mm;
   border: 1px solid #333;
+  border-radius: 3px;
   overflow: hidden;
+  background: #fff;
 }
 
 .card.depan .foto img {
@@ -235,67 +153,95 @@ td{
   object-fit: cover;
 }
 
-/* QR Code section */
-.qr-section {
+.foto-empty {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 2mm;
-  height: 30mm;
-  margin-top: -12mm;
-  margin-left: -14mm;
-  z-index: 1;
-}
-.qr-section table{
-    font-size: 6pt;
-    line-height: 1.5;
-}
-
-.side-icon {
-  width: 10mm;
-  height: auto;
-}
-
-/* Kartu belakang */
-.card.belakang h3 {
-  margin-top: 5mm;
-  z-index: 1;
-}
-.card.belakang p {
+  justify-content: center;
   font-size: 6pt;
-  font-weight: bold;
-  z-index: 1;
+  color: #64748b;
 }
 
-.card.belakang ul {
-  padding-left: 15px;
-  line-height: 1.5;
-  font-size: 6pt;
-  z-index: 1;
+.content-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2.5mm;
+}
+
+.identity {
+  min-width: 0;
+}
+
+.label {
+  margin: 0;
+  font-size: 6.3pt;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #14532d;
+}
+
+.label.mt {
+  margin-top: 1.8mm;
+}
+
+.member-name {
+  margin: 0.8mm 0 0;
+  font-size: 13pt;
+  line-height: 0.95;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.member-number {
+  margin: 0.8mm 0 0;
+  font-size: 10.5pt;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #0b6b31;
+}
+
+.qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1mm;
+}
+
+.qr-text {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  font-size: 5.2pt;
+  line-height: 1.2;
+  color: #0f172a;
 }
 
 .card.belakang .ttd {
-    margin-left: 2mm;
-    margin-right: 0mm;
-    display: flex;
-    justify-content: space-between;
-    margin-top: auto;
-    color: #333;
-    z-index: 1;
-}
-.ttd p{
-    margin-bottom: 2mm;
-    text-align: center;
-    
-    letter-spacing: 1px;
-
-}
-.ttd .name{
-    margin-top: -1mm;
-    
+  margin-left: 2mm;
+  margin-right: 0mm;
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  color: #333;
+  z-index: 1;
 }
 
-/* Tombol cetak */
+.ttd p {
+  margin-bottom: 2mm;
+  text-align: center;
+  letter-spacing: 1px;
+  font-size: 6pt;
+  font-weight: bold;
+}
+
+.ttd .name {
+  margin-top: -1mm;
+}
+
 .btn-print {
   margin-top: 20px;
   padding: 10px 20px;
@@ -305,10 +251,17 @@ td{
   cursor: pointer;
 }
 
-/* Print styles */
 @media print {
-  .btn-print { display: none; }
-  body { background: white; }
-  .cards-container { gap: 5mm; }
+  .btn-print {
+    display: none;
+  }
+
+  body {
+    background: white;
+  }
+
+  .cards-container {
+    gap: 5mm;
+  }
 }
 </style>

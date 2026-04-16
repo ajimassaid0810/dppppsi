@@ -6,24 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-       Schema::create('kota_kab', function (Blueprint $table) {
-             $table->unsignedBigInteger('id')->primary();
+        Schema::create('kota_kab', function (Blueprint $table) {
+            $table->id();
+            $table->string('kode', 2);
             $table->string('nama');
             $table->unsignedBigInteger('provinsi_id');
+            $table->string('nama_ketua_dpd')->nullable();
+            $table->string('url_ttd_ketua')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             $table->foreign('provinsi_id')->references('id')->on('provinsi')->onDelete('cascade');
+            $table->unique(['provinsi_id', 'kode']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('kota_kab');

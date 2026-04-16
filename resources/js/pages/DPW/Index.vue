@@ -29,38 +29,40 @@ function confirmDelete(id) {
 
 <template>
 <AppLayout :breadcrumbs="breadcrumbItems">
-  <div class="p-4 mt-4">
-    <h1 class="text-2xl font-bold mb-6">Daftar DPW Provinsi</h1>
+  <div class="mt-4 p-4">
+    <h1 class="mb-6 text-2xl font-bold text-slate-900 dark:text-white">Daftar DPW Provinsi</h1>
 
     <!-- Search & Add -->
-    <div class="flex items-center gap-2 mb-4">
+    <div class="mb-4 flex items-center gap-2">
       <input
         v-model="search"
         @keyup.enter="submitSearch"
         type="text"
         placeholder="Cari provinsi..."
-        class="border px-3 py-2 rounded w-full"
+        class="w-full rounded border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-[#10261c] dark:text-white dark:placeholder:text-slate-400"
       />
       <button @click="submitSearch" class="bg-blue-600 text-white px-4 py-2 rounded">Cari</button>
       <a href="/dpw-provinsi/create" class="bg-primary text-white border-primary text-white px-4 py-2 rounded">Tambah</a>
     </div>
 
     <!-- Table -->
-    <div class="overflow-x-auto border rounded-lg">
-   <table class=" w-full text-left text-sm border rounded-lg overflow-hidden">
-     <thead class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 uppercase text-xs tracking-wider">
+    <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-[#0f1b16]">
+   <table class="w-full overflow-hidden rounded-lg border text-left text-sm dark:border-slate-800">
+     <thead class="bg-slate-100 text-xs uppercase tracking-wider text-slate-700 dark:bg-[#163425] dark:text-slate-100">
 
-        <tr class="bg-gray-100 text-left">
-          <th class="px-4 py-2">ID</th>
+        <tr class="text-left">
+          <th class="px-4 py-2">No</th>
+          <th class="px-4 py-2">Kode</th>
           <th class="px-4 py-2">Nama</th>
           <th class="px-4 py-2">Ketua DPW</th>
           <th class="px-4 py-2">Tanda Tangan</th>
           <th class="px-4 py-2">Aksi</th>
         </tr>
       </thead>
-      <tbody>
-        <tr v-for="p,index in provinsi.data" :key="p.id" class="border-t hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+      <tbody class="dark:text-slate-100">
+        <tr v-for="p,index in provinsi.data" :key="p.id" class="border-t border-slate-200 transition hover:bg-gray-50 dark:border-slate-800 dark:hover:bg-[#16261e]">
            <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ index + 1 }}</td>
+           <td class="px-4 py-2 font-mono text-gray-800 dark:text-gray-100">{{ p.kode || '-' }}</td>
            <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ p.nama }}</td>
            <td class="px-4 py-2 text-gray-800 dark:text-gray-100">{{ p.nama_ketua_dpw || '-' }}</td>
            <td class="px-4 py-2 text-gray-800 dark:text-gray-100">
@@ -81,7 +83,7 @@ function confirmDelete(id) {
     </table>
 </div>
     <!-- Pagination -->
-    <div class="flex justify-center mt-4 space-x-1">
+    <div class="mt-4 flex justify-center space-x-1">
       <template v-for="link in provinsi.links" :key="link.label">
         <button
           v-if="link.url"
@@ -89,7 +91,7 @@ function confirmDelete(id) {
           v-html="link.label"
           :class="[
             'px-3 py-1 rounded border',
-            link.active ? 'bg-primary text-white border-primary' : 'bg-white dark:bg-gray-900 hover:bg-gray-100'
+            link.active ? 'bg-primary text-white border-primary' : 'bg-white hover:bg-gray-100 dark:border-slate-700 dark:bg-[#10261c] dark:text-slate-100 dark:hover:bg-[#163425]'
           ]"
         />
       </template>

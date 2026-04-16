@@ -2,7 +2,6 @@
   <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
     <div id="print-area">
       <div class="cards-container">
-        <!-- Kartu Depan -->
         <div class="card depan">
           <div class="background" :style="{ backgroundImage: `url(${frontBackgroundUrl})` }"></div>
 
@@ -15,117 +14,94 @@
           </div>
 
           <div class="middle-section">
-            <div class="foto" v-if="anggota.foto">
-              <img :src="anggota.foto ? `/storage/${anggota.foto}` : '/storage/images/default.png'" />
+            <div class="photo-wrap">
+              <div class="foto" v-if="anggota.foto_url">
+                <img :src="anggota.foto_url" />
+              </div>
+              <div v-else class="foto foto-empty">Foto</div>
             </div>
-            <div class="data">
-              <table>
-                <tr><td>Nama</td><td>: {{ anggota.nama_lengkap }}</td></tr>
-                <tr><td>NIK</td><td>: {{ anggota.nik }}</td></tr>
-                <tr><td>Alamat</td><td>: {{ anggota.alamat ?? '-' }}</td></tr>
-                <tr><td>Kelurahan</td><td>: {{ anggota.kelurahan?.nama ?? '-' }}</td></tr>
-                <tr><td>Kecamatan</td><td>: {{ anggota.kelurahan?.kecamatan?.nama ?? '-' }}</td></tr>
-                <tr><td>DPD Kota/Kab</td><td>: {{ anggota.kelurahan?.kecamatan?.kota_kab?.nama ?? '-' }}</td></tr>
-                <tr><td>DPW Provinsi</td><td>: {{ anggota.kelurahan?.kecamatan?.kota_kab?.provinsi?.nama ?? '-' }}</td></tr>
-                <tr><td>Golongan Darah</td><td>: {{ anggota.golongan_darah ?? '-' }}</td></tr>
-                <tr><td>Masa Berlaku</td><td>: {{ '5 Tahun' }}</td></tr>
-              </table>
+
+            <div class="content-wrap">
+              <div class="identity">
+                <h1 class="member-name">{{ anggota.nama_lengkap }}</h1>
+                <p class="member-number">{{ anggota.nomor_anggota }}</p>
+              </div>
+
+              <div class="qr-wrap">
+                <QrcodeVue :value="publicUrl" :size="66" :margin="1" level="M" render-as="svg" />
+                <p class="qr-text">Scan untuk cek keaslian anggota</p>
+              </div>
             </div>
-          </div>67
+          </div>
         </div>
 
-        <!-- Kartu Belakang -->
         <div class="card belakang">
           <div class="background" :style="{ backgroundImage: `url(${backBackgroundUrl})` }"></div>
 
-          <h3 class="font-bold mb-4">CIRI ANGGOTA PPSI</h3>
+          <h3 class="font-bold mb-2">CIRI ANGGOTA PPSI</h3>
           <p class="text-black">Perkataan dan perbuatan selalu sesuai dengan:</p>
           <ul>
             <li>TRILOGI PPSI: Budi - Bakti - Sakti</li>
-            <li>TEKAD PPSI: Akur jeung Dulur, Paceg’na Galur, Njaga Lembur</li>
+            <li>TEKAD PPSI: Akur jeung Dulur, Pacegâ€™na Galur, Njaga Lembur</li>
             <li>PAPAGON PPSI: Sholat - Silat - Siliwangi</li>
           </ul>
 
-          <div class="barcode-belakang" v-if="anggota.barcode_data">
-            <svg id="barcode"></svg>
-          </div>
+         
 
           <div class="ttd">
-            <p>Karawang, 01 Oktober 2025</p>
-            <p>Ketua Umum DPP PPSI</p>
-            <p>(Tanda Tangan Digital)</p>
+            <div class="ttd-item">
+              <p>Ketua Umum DPP PPSI </p>
+                <img class="img-ttd" src="https://dimensy.id/uploads/posts/attachments/mceclip017.png">
+              <p class="name">Galih Santika Fadillahkusumah, S.S., M.Si </p>
+            </div>
+            <div class="ttd-item ttd-kiri">
+              <p>Ketua DPW PPSI <br> Provinsi {{ dpwProvinsiName }}</p>
+              <img v-if="dpwTtdUrl" class="img-ttd" :src="dpwTtdUrl" alt="TTD Ketua DPW" />
+              <div v-else style="height: 8mm;"></div>
+              <p class="font-light">{{ dpwKetuaName }}</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <button @click="goToPrintPage()" class="btn-print">🖨 Cetak</button>
+      <button @click="window.print()" class="btn-print">Cetak</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { usePage } from '@inertiajs/vue3'
-import { onMounted } from 'vue'
-import JsBarcode from 'jsbarcode'
-
-interface Cabang {
-  id: string
-  nama_cabang: string
-}
+import QrcodeVue from 'qrcode.vue'
 
 interface Anggota {
   id: string
+  nomor_anggota: string
   nama_lengkap: string
-  nik: string
-  tanggal_lahir: string
-  alamat: string | null
-  telepon: string | null
-  perguruan: string | null
-  golongan_darah: string | null
-  masa_berlaku: string | null
-  tanggal_gabung: string
-  cabang?: Cabang
-  kelurahan?: {
-    id: string
-    nama: string
-    kecamatan?: {
-      nama: string
-      kota_kab?: {
-        nama: string
-        provinsi?: {
-          nama: string
-        }
-      }
-    }
+  foto_path?: string | null
+  foto_url?: string | null
+  kota_kab?: {
+    provinsi?: {
+      nama?: string | null
+      nama_ketua_dpw?: string | null
+      url_ttd_ketua?: string | null
+      ttd_public_url?: string | null
+    } | null
   } | null
-  foto?: string | null
-  barcode_data?: string
 }
 
-const page = usePage<{ anggota: Anggota }>()
+const page = usePage<{ anggota: Anggota; publicUrl: string }>()
 const anggota = page.props.anggota
+const publicUrl = page.props.publicUrl
+const dpwProvinsiName = anggota.kota_kab?.provinsi?.nama ?? '-'
+const dpwKetuaName = anggota.kota_kab?.provinsi?.nama_ketua_dpw ?? '-'
+const dpwTtdUrl =
+  anggota.kota_kab?.provinsi?.ttd_public_url ??
+  anggota.kota_kab?.provinsi?.url_ttd_ketua ??
+  null
 
 const logoUrl = '/storage/images/logo.png'
 const frontBackgroundUrl = '/storage/images/front.png'
 const backBackgroundUrl = '/storage/images/back.png'
-
-onMounted(() => {
-  if (anggota.barcode_data) {
-    JsBarcode('#barcode', anggota.barcode_data, {
-      format: 'CODE128',
-      lineColor: '#000',
-      width: 2,
-      height: 40,
-      displayValue: false
-    })
-  }
-})
-
-function goToPrintPage() {
-
-    window.location.href = `/anggota/${anggota.id}/cetak`
-  
-}
 </script>
 
 <style>
@@ -142,7 +118,6 @@ function goToPrintPage() {
   flex-wrap: wrap;
 }
 
-/* Kartu */
 .card {
   width: 85.6mm;
   height: 54mm;
@@ -158,19 +133,14 @@ function goToPrintPage() {
   background-color: white;
 }
 
-/* Background gambar */
 .card .background {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background-size: cover;
   background-position: center;
   z-index: 0;
 }
 
-/* Top section */
 .top-section {
   display: flex;
   align-items: center;
@@ -186,21 +156,30 @@ function goToPrintPage() {
 .header-text {
   line-height: 1.1;
   font-size: 7pt;
-}
-
-/* Middle section */
-.middle-section {
-  display: flex;
-  gap: 4mm;
-  margin-top: 3mm;
   z-index: 1;
 }
 
+.middle-section {
+  position: relative;
+  z-index: 1;
+  padding: 3mm 4.5mm 0 5mm;
+  display: flex;
+  gap: 3.5mm;
+  align-items: center;
+  height: 31mm;
+}
+
+.photo-wrap {
+  flex: 0 0;
+}
+
 .card.depan .foto {
-  width: 25mm;
-  height: 30mm;
+  width: 24mm;
+  height: 29mm;
   border: 1px solid #333;
+  border-radius: 3px;
   overflow: hidden;
+  background: #fff;
 }
 
 .card.depan .foto img {
@@ -209,27 +188,80 @@ function goToPrintPage() {
   object-fit: cover;
 }
 
-.card .data {
+.foto-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 6pt;
-  line-height: 1.1;
-  z-index: 1;
+  color: #64748b;
 }
 
-.card .data table {
-  width: 100%;
-  border-collapse: collapse;
+.content-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2.5mm;
 }
 
-.card .data td {
-  padding: 1px 4px;
-  vertical-align: top;
+.identity {
+  min-width: 0;
 }
 
-/* Kartu belakang */
+.label {
+  margin: 0;
+  font-size: 6.3pt;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #14532d;
+}
+
+.label.mt {
+  margin-top: 1.8mm;
+}
+
+.member-name {
+  margin: 2mm 0 0;
+  font-family: 'League Gothic', sans-serif;
+  font-size: 13pt;
+  line-height: 0.95;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.member-number {
+  margin: 0.8mm 0 0;
+  font-family: 'League Gothic', sans-serif;
+  font-size: 10.5pt;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #0b6b31;
+}
+
+.qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1mm;
+}
+
+.qr-text {
+  margin: 0;
+  font-size: 5.2pt;
+  line-height: 1.2;
+  color: #0f172a;
+}
+
 .card.belakang h3 {
-margin-top: 5mm;
+  margin-top: 3mm;
+  margin-bottom:3mm;
   z-index: 1;
 }
+
 .card.belakang p {
   font-size: 6pt;
   font-weight: bold;
@@ -254,14 +286,32 @@ margin-top: 5mm;
 }
 
 .card.belakang .ttd {
+  margin-left: 2mm;
+  margin-right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2mm;
   margin-top: auto;
-  margin-bottom: 5mm;
-  text-align: right;
-  font-size: 6pt;
+  color: #333;
   z-index: 1;
 }
 
-/* Tombol cetak */
+.card.belakang .ttd-item {
+  flex: 3/5 2/5 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  text-align: center;
+}
+
+.card.belakang .ttd-item p {
+  margin: 0;
+  text-align: center;
+}
+
 .btn-print {
   margin-top: 20px;
   padding: 10px 20px;
@@ -271,10 +321,25 @@ margin-top: 5mm;
   cursor: pointer;
 }
 
-/* Print styles */
+.img-ttd{
+  display: block;
+  max-width:20mm;
+  max-height: 10mm;
+  margin: 0 auto;
+}
+
+
 @media print {
-  .btn-print { display: none; }
-  body { background: white; }
-  .cards-container { gap: 5mm; }
+  .btn-print {
+    display: none;
+  }
+
+  body {
+    background: white;
+  }
+
+  .cards-container {
+    gap: 5mm;
+  }
 }
 </style>

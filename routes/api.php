@@ -3,9 +3,6 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\WilayahController;
-use App\Models\KotaKab;
-use App\Models\Kecamatan;
-use App\Models\Kelurahan;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,5 +20,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/kota-kab/{provinsi}', [WilayahController::class, 'getKotaKab']);
 Route::get('/kecamatan/{kotaKab}', [WilayahController::class, 'getKecamatan']);
+Route::get('/pagoruan/{kecamatan}', [WilayahController::class, 'getPagoruan']);
 Route::get('/kelurahan/{kecamatan}', [WilayahController::class, 'getKelurahan']);
-

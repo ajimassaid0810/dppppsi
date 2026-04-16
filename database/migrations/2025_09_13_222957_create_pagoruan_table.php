@@ -6,29 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('pagoruan', function (Blueprint $table) {
-            $table->id()->primary();
+            $table->id();
+            $table->string('kode', 20)->nullable()->unique();
             $table->string('nama');
             $table->unsignedBigInteger('kecamatan_id');
-              $table->text('alamat')->nullable();
+            $table->text('alamat')->nullable();
             $table->string('telepon')->nullable();
+            $table->string('nama_pimpinan')->nullable();
             $table->string('nama_pelatih')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             $table->foreign('kecamatan_id')->references('id')->on('kecamatan')->onDelete('cascade');
+            $table->unique(['kecamatan_id', 'nama']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('kelurahan');
+        Schema::dropIfExists('pagoruan');
     }
 };

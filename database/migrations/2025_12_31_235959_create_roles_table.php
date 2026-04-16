@@ -8,12 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('provinsi', function (Blueprint $table) {
+        Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string('kode', 2)->unique();
-            $table->string('nama');
-            $table->string('nama_ketua_dpw')->nullable();
-            $table->string('url_ttd_ketua')->nullable();
+            $table->string('name')->unique();
+            $table->string('display_name');
+            $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
@@ -21,6 +20,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('provinsi');
+        Schema::dropIfExists('roles');
     }
 };

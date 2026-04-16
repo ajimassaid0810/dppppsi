@@ -10,18 +10,23 @@ class Provinsi extends Model
     use HasFactory;
 
     protected $table = 'provinsi';
-public $incrementing = false;
     protected $keyType = 'int';
 
     protected $fillable = [
-        'id',
+        'kode',
         'nama',
         'nama_ketua_dpw',
-        'url_ttd_ketua'
+        'url_ttd_ketua',
+        'is_active',
     ];
 
     public function kotaKab()
     {
         return $this->hasMany(KotaKab::class, 'provinsi_id');
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'provinsi_id');
     }
 }

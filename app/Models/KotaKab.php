@@ -10,10 +10,16 @@ class KotaKab extends Model
     use HasFactory;
 
     protected $table = 'kota_kab';
-    public $incrementing = false;
     protected $keyType = 'int';
 
-    protected $fillable = ['id','nama', 'provinsi_id'];
+    protected $fillable = [
+        'kode',
+        'nama',
+        'provinsi_id',
+        'nama_ketua_dpd',
+        'url_ttd_ketua',
+        'is_active',
+    ];
 
     public function provinsi()
     {
@@ -23,5 +29,10 @@ class KotaKab extends Model
     public function kecamatan()
     {
         return $this->hasMany(Kecamatan::class, 'kota_kab_id');
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'kota_kab_id');
     }
 }

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { type BreadcrumbItem } from '@/types'
 
 const props = defineProps<{
-  provinsiList: { id: number; nama: string }[]
+  provinsiList: { id: number; kode?: string | null; nama: string }[]
 }>()
 
 const breadcrumbItems: BreadcrumbItem[] = [
@@ -14,6 +14,7 @@ const breadcrumbItems: BreadcrumbItem[] = [
 ]
 
 const form = useForm({
+  kode: '',
   nama: '',
   provinsi_id: props.provinsiList[0]?.id || null,
 })
@@ -21,7 +22,7 @@ const form = useForm({
 function submit() {
   form.post('/dpd-kota-kab', {
     onSuccess: () => {
-      form.reset('nama', 'provinsi_id')
+      form.reset('kode', 'nama', 'provinsi_id')
     },
   })
 }
@@ -35,6 +36,21 @@ function submit() {
       <h1 class="text-2xl font-bold mb-4">Tambah DPD Kota/Kab</h1>
 
       <form @submit.prevent="submit" class="space-y-4">
+        <div>
+          <label for="kode" class="block font-medium mb-1">Kode DPD</label>
+          <input
+            id="kode"
+            v-model="form.kode"
+            type="text"
+            maxlength="2"
+            class="w-full border px-3 py-2 rounded"
+            :class="{ 'border-red-500': form.errors.kode }"
+          />
+          <div v-if="form.errors.kode" class="text-red-600 text-sm mt-1">
+            {{ form.errors.kode }}
+          </div>
+        </div>
+
         <!-- Nama Kota/Kab -->
         <div>
           <label for="nama" class="block font-medium mb-1">Nama Kota/Kab</label>
@@ -60,7 +76,7 @@ function submit() {
             :class="{ 'border-red-500': form.errors.provinsi_id }"
           >
             <option v-for="prov in props.provinsiList" :key="prov.id" :value="prov.id">
-              {{ prov.nama }}
+              {{ prov.kode ? `[${prov.kode}] ` : '' }}{{ prov.nama }}
             </option>
           </select>
           <div v-if="form.errors.provinsi_id" class="text-red-600 text-sm mt-1">

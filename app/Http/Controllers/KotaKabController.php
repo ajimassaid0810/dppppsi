@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\KotaKab;
 use App\Models\Provinsi;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class KotaKabController extends Controller
@@ -52,11 +53,17 @@ class KotaKabController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'kode' => [
+                'required',
+                'string',
+                'size:2',
+                Rule::unique('kota_kab', 'kode')->where(fn ($query) => $query->where('provinsi_id', $request->provinsi_id)),
+            ],
             'nama' => 'required|string|max:255',
             'provinsi_id' => 'required|exists:provinsi,id',
         ]);
 
-        KotaKab::create($request->only([ 'nama', 'provinsi_id']));
+        KotaKab::create($request->only(['kode', 'nama', 'provinsi_id']));
 
         return redirect()->route('dpd-kota-kab.index')->with('success', 'Kota/Kab berhasil ditambahkan');
     }
@@ -74,11 +81,19 @@ class KotaKabController extends Controller
     public function update(Request $request, KotaKab $kotaKab)
     {
         $request->validate([
+            'kode' => [
+                'required',
+                'string',
+                'size:2',
+                Rule::unique('kota_kab', 'kode')
+                    ->where(fn ($query) => $query->where('provinsi_id', $request->provinsi_id))
+                    ->ignore($kotaKab->id, 'id'),
+            ],
             'nama' => 'required|string|max:255',
             'provinsi_id' => 'required|exists:provinsi,id',
         ]);
 
-        $kotaKab->update($request->only(['nama', 'provinsi_id']));
+        $kotaKab->update($request->only(['kode', 'nama', 'provinsi_id']));
 
         return redirect()->route('dpd-kota-kab.index')->with('success', 'Kota/Kab berhasil diperbarui');
     }

@@ -24,6 +24,11 @@ defineProps<Props>();
             <UserInfo :user="user" :show-email="true" />
         </div>
     </DropdownMenuLabel>
+    <div v-if="user.role" class="px-3 pb-2">
+        <span class="inline-flex rounded-full bg-[#eef8ef] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0b6b31] dark:bg-[#123322] dark:text-[#9fe7a8]">
+            {{ user.role.display_name }}
+        </span>
+    </div>
     <DropdownMenuSeparator />
     <DropdownMenuGroup>
         <DropdownMenuItem :as-child="true">

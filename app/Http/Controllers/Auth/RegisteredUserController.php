@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
-use App\Models\Cabang;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,21 +30,22 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-    'username' => 'required|string|max:255|unique:users',
-    'email' => 'nullable|string|lowercase|email|max:255|unique:users',
-    'password' => ['required', 'confirmed', Rules\Password::defaults()],
-    'role' => 'required|in:superadmin,admin_cabang',
-    'pagoruan_id' => 'nullable|exists:pagoruan,id',
-]);
+        $defaultRole = Role::query()->where('name', 'anggota')->firstOrFail();
 
-$user = User::create([
-    'username' => $request->username,
-    'email' => $request->email,
-    'password' => Hash::make($request->password),
-    'role' => $request->role,
-    'pagoruan_id' => $request->pagoruan_id,
-]);
+        $request->validate([
+            'username' => 'required|string|max:255|unique:users',
+            'email' => 'nullable|string|lowercase|email|max:255|unique:users',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'pagoruan_id' => 'nullable|exists:pagoruan,id',
+        ]);
+
+        $user = User::create([
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role_id' => $defaultRole->id,
+            'pagoruan_id' => $request->pagoruan_id,
+        ]);
 
         
 

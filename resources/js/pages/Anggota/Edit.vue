@@ -16,6 +16,7 @@ interface KotaKabItem {
   id: number
   kode?: string | null
   nama: string
+  provinsi?: ProvinsiItem | null
 }
 
 interface KecamatanItem {
@@ -31,30 +32,53 @@ interface PagoruanItem {
 }
 
 const props = defineProps<{
+  anggota: {
+    id: string
+    nomor_anggota: string
+    nama_lengkap: string
+    jenis_identitas: 'ktp' | 'kartu_pelajar'
+    nomor_identitas: string | null
+    tanggal_lahir: string
+    alamat: string | null
+    telepon: string | null
+    golongan_darah: string | null
+    tanggal_gabung: string | null
+    masa_berlaku_sampai: string | null
+    status_pengajuan: string
+    catatan_verifikasi: string | null
+    foto_path: string | null
+    foto_url?: string | null
+    kk_path: string | null
+    dokumen_identitas_path: string | null
+    kota_kab_id: number
+    kecamatan_id: number | null
+    pagoruan_id: number | null
+    kota_kab?: { id: number; kode?: string | null; nama: string; provinsi?: ProvinsiItem | null } | null
+  }
   provinsi: ProvinsiItem[]
 }>()
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Daftar Anggota', href: '/anggota' },
-  { title: 'Tambah Anggota', href: '/anggota/create' },
+  { title: 'Edit Anggota', href: `/anggota/${props.anggota.id}/edit` },
 ]
 
 const form = useForm({
-  nama_lengkap: '',
-  jenis_identitas: 'ktp',
-  nomor_identitas: '',
-  tanggal_lahir: '',
-  alamat: '',
-  provinsi_id: '' as number | '',
-  kota_kab_id: '' as number | '',
-  kecamatan_id: '' as number | '',
-  pagoruan_id: '' as number | '',
-  telepon: '',
-  golongan_darah: '',
-  tanggal_gabung: '',
-  masa_berlaku_sampai: '',
-  status_pengajuan: 'draft_dpd',
-  catatan_verifikasi: '',
+  nama_lengkap: props.anggota.nama_lengkap ?? '',
+  jenis_identitas: props.anggota.jenis_identitas ?? 'ktp',
+  nomor_identitas: props.anggota.nomor_identitas ?? '',
+  tanggal_lahir: props.anggota.tanggal_lahir ?? '',
+  alamat: props.anggota.alamat ?? '',
+  provinsi_id: props.anggota.kota_kab?.provinsi?.id ?? '' as number | '',
+  kota_kab_id: props.anggota.kota_kab_id ?? '' as number | '',
+  kecamatan_id: props.anggota.kecamatan_id ?? '' as number | '',
+  pagoruan_id: props.anggota.pagoruan_id ?? '' as number | '',
+  telepon: props.anggota.telepon ?? '',
+  golongan_darah: props.anggota.golongan_darah ?? '',
+  tanggal_gabung: props.anggota.tanggal_gabung ?? '',
+  masa_berlaku_sampai: props.anggota.masa_berlaku_sampai ?? '',
+  status_pengajuan: props.anggota.status_pengajuan ?? 'draft_dpd',
+  catatan_verifikasi: props.anggota.catatan_verifikasi ?? '',
   foto: null as File | null,
   kk: null as File | null,
   dokumen_identitas: null as File | null,
@@ -63,20 +87,22 @@ const form = useForm({
 const kotaKabList = ref<KotaKabItem[]>([])
 const kecamatanList = ref<KecamatanItem[]>([])
 const pagoruanList = ref<PagoruanItem[]>([])
+const initializing = ref(true)
 
 const selectedProvinsi = computed(() => props.provinsi.find((item) => item.id === form.provinsi_id))
 const selectedKotaKab = computed(() => kotaKabList.value.find((item) => item.id === form.kota_kab_id))
 const nomorPreview = computed(() => {
   if (!selectedProvinsi.value?.kode || !selectedKotaKab.value?.kode) {
-    return 'Otomatis setelah data disimpan'
+    return props.anggota.nomor_anggota
   }
 
-  return `${selectedProvinsi.value.kode}.${selectedKotaKab.value.kode}.000001`
+  return `${selectedProvinsi.value.kode}.${selectedKotaKab.value.kode}.xxxxxx`
 })
 
 watch(
   () => form.provinsi_id,
   async (value) => {
+    const previousKota = form.kota_kab_id
     form.kota_kab_id = ''
     form.kecamatan_id = ''
     form.pagoruan_id = ''
@@ -90,12 +116,18 @@ watch(
 
     const response = await axios.get(`/api/kota-kab/${value}`)
     kotaKabList.value = response.data
+
+    if (initializing.value && previousKota) {
+      form.kota_kab_id = previousKota
+    }
   },
+  { immediate: true },
 )
 
 watch(
   () => form.kota_kab_id,
   async (value) => {
+    const previousKecamatan = form.kecamatan_id
     form.kecamatan_id = ''
     form.pagoruan_id = ''
     kecamatanList.value = []
@@ -107,22 +139,36 @@ watch(
 
     const response = await axios.get(`/api/kecamatan/${value}?paginate=0`)
     kecamatanList.value = response.data.data ?? []
+
+    if (initializing.value && previousKecamatan) {
+      form.kecamatan_id = previousKecamatan
+    }
   },
+  { immediate: true },
 )
 
 watch(
   () => form.kecamatan_id,
   async (value) => {
+    const previousPagoruan = form.pagoruan_id
     form.pagoruan_id = ''
     pagoruanList.value = []
 
     if (!value) {
+      initializing.value = false
       return
     }
 
     const response = await axios.get(`/api/pagoruan/${value}`)
     pagoruanList.value = response.data
+
+    if (initializing.value && previousPagoruan) {
+      form.pagoruan_id = previousPagoruan
+    }
+
+    initializing.value = false
   },
+  { immediate: true },
 )
 
 function handleFile(field: 'foto' | 'kk' | 'dokumen_identitas', event: Event) {
@@ -131,7 +177,10 @@ function handleFile(field: 'foto' | 'kk' | 'dokumen_identitas', event: Event) {
 }
 
 function submit() {
-  form.post('/anggota', {
+  form.transform((data) => ({
+    ...data,
+    _method: 'put',
+  })).post(`/anggota/${props.anggota.id}`, {
     forceFormData: true,
   })
 }
@@ -139,19 +188,19 @@ function submit() {
 
 <template>
   <AppLayout :breadcrumbs="breadcrumbs">
-    <Head title="Tambah Anggota" />
+    <Head title="Edit Anggota" />
 
     <div class="mx-auto max-w-6xl space-y-6 p-6">
       <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0f1b16]">
         <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 class="text-3xl font-semibold text-slate-950 dark:text-white">Tambah Anggota</h1>
+            <h1 class="text-3xl font-semibold text-slate-950 dark:text-white">Edit Anggota</h1>
             <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-300">
-              Form ini mengikuti struktur baru PPSI: DPD, DPC, dan Pagoruan. Nomor anggota dibentuk otomatis dari kode wilayah.
+              Nomor anggota saat ini: <span class="font-semibold text-slate-900 dark:text-white">{{ anggota.nomor_anggota }}</span>
             </p>
           </div>
           <div class="rounded-2xl border border-[#d7ebd9] bg-[#eef8ef] px-4 py-3 text-sm font-medium text-[#0b6b31] dark:border-[#1f4932] dark:bg-[#123322] dark:text-[#9fe7a8]">
-            Preview nomor anggota: {{ nomorPreview }}
+            Struktur nomor: {{ nomorPreview }}
           </div>
         </div>
       </div>
@@ -177,7 +226,6 @@ function submit() {
             <div>
               <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Nomor Identitas</label>
               <input v-model="form.nomor_identitas" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 dark:border-slate-700 dark:bg-[#10261c] dark:text-white" />
-              <p v-if="form.errors.nomor_identitas" class="mt-1 text-sm text-red-600">{{ form.errors.nomor_identitas }}</p>
             </div>
           </div>
 
@@ -185,19 +233,16 @@ function submit() {
             <div>
               <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Tanggal Lahir</label>
               <input v-model="form.tanggal_lahir" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 dark:border-slate-700 dark:bg-[#10261c] dark:text-white" />
-              <p v-if="form.errors.tanggal_lahir" class="mt-1 text-sm text-red-600">{{ form.errors.tanggal_lahir }}</p>
             </div>
             <div>
               <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Telepon</label>
               <input v-model="form.telepon" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 dark:border-slate-700 dark:bg-[#10261c] dark:text-white" />
-              <p v-if="form.errors.telepon" class="mt-1 text-sm text-red-600">{{ form.errors.telepon }}</p>
             </div>
           </div>
 
           <div>
             <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Alamat</label>
             <textarea v-model="form.alamat" rows="4" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 dark:border-slate-700 dark:bg-[#10261c] dark:text-white" />
-            <p v-if="form.errors.alamat" class="mt-1 text-sm text-red-600">{{ form.errors.alamat }}</p>
           </div>
 
           <div class="grid gap-4 md:grid-cols-3">
@@ -243,7 +288,6 @@ function submit() {
                   {{ item.kode ? `[${item.kode}] ` : '' }}{{ item.nama }}
                 </option>
               </select>
-              <p v-if="form.errors.kota_kab_id" class="mt-1 text-sm text-red-600">{{ form.errors.kota_kab_id }}</p>
             </div>
           </div>
 
@@ -256,7 +300,6 @@ function submit() {
                   {{ item.kode ? `[${item.kode}] ` : '' }}{{ item.nama }}
                 </option>
               </select>
-              <p v-if="form.errors.kecamatan_id" class="mt-1 text-sm text-red-600">{{ form.errors.kecamatan_id }}</p>
             </div>
             <div>
               <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Pagoruan / Perguruan</label>
@@ -266,24 +309,36 @@ function submit() {
                   {{ item.kode ? `[${item.kode}] ` : '' }}{{ item.nama }}
                 </option>
               </select>
-              <p v-if="form.errors.pagoruan_id" class="mt-1 text-sm text-red-600">{{ form.errors.pagoruan_id }}</p>
             </div>
           </div>
 
           <div class="grid gap-4 md:grid-cols-3">
             <div>
-              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Foto</label>
+              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Foto Baru</label>
               <input type="file" accept="image/*" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 dark:border-slate-700 dark:bg-[#10261c] dark:text-white" @change="handleFile('foto', $event)" />
             </div>
             <div>
-              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">KK</label>
+              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">KK Baru</label>
               <input type="file" accept=".jpg,.jpeg,.png,.pdf" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 dark:border-slate-700 dark:bg-[#10261c] dark:text-white" @change="handleFile('kk', $event)" />
-              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Opsional. Tidak wajib kalau hanya ingin upload KTP atau Kartu Pelajar.</p>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Opsional. Boleh upload KK saja atau dikosongkan.</p>
             </div>
             <div>
-              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">KTP / Kartu Pelajar</label>
+              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Dokumen Identitas Baru</label>
               <input type="file" accept=".jpg,.jpeg,.png,.pdf" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 dark:border-slate-700 dark:bg-[#10261c] dark:text-white" @change="handleFile('dokumen_identitas', $event)" />
-              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Opsional. Boleh upload salah satu dokumen saja, tidak harus keduanya.</p>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Opsional. Boleh upload KTP atau Kartu Pelajar saja tanpa KK.</p>
+            </div>
+          </div>
+
+          <div class="grid gap-4 md:grid-cols-2">
+            <div v-if="anggota.foto_url" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+              <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Foto saat ini</p>
+              <img :src="anggota.foto_url" class="mt-3 h-40 w-full rounded-xl object-cover" />
+            </div>
+            <div class="space-y-3 rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+              <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Dokumen saat ini</p>
+              <a v-if="anggota.kk_path" :href="`/storage/${anggota.kk_path}`" target="_blank" class="block text-sm text-[#0b6b31] underline dark:text-[#9fe7a8]">Lihat KK</a>
+              <a v-if="anggota.dokumen_identitas_path" :href="`/storage/${anggota.dokumen_identitas_path}`" target="_blank" class="block text-sm text-[#0b6b31] underline dark:text-[#9fe7a8]">Lihat Dokumen Identitas</a>
+              <p v-if="!anggota.kk_path && !anggota.dokumen_identitas_path" class="text-sm text-slate-500 dark:text-slate-400">Belum ada dokumen tersimpan.</p>
             </div>
           </div>
 
@@ -308,7 +363,7 @@ function submit() {
         <div class="xl:col-span-2 flex justify-end">
           <Button type="submit" :disabled="form.processing">
             <span v-if="form.processing">Menyimpan...</span>
-            <span v-else>Simpan Anggota</span>
+            <span v-else>Update Anggota</span>
           </Button>
         </div>
       </form>

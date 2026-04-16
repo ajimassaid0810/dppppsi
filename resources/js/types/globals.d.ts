@@ -22,6 +22,7 @@ declare module '@inertiajs/core' {
     flash: {
       success?: string
       error?: string
+      info?: string
     }
     errors: Record<string, string>
   }

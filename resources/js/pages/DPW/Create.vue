@@ -17,6 +17,7 @@ const breadcrumbItems: BreadcrumbItem[] = [
 ]
 
 const form = useForm({
+  kode: '',
   nama: '',
   nama_ketua_dpw: '',
   ttd_ketua: null as File | null,
@@ -36,7 +37,7 @@ function submit() {
   form.post('/dpw-provinsi', {
     forceFormData: true,
     onSuccess: () => {
-      form.reset('nama', 'nama_ketua_dpw', 'ttd_ketua')
+      form.reset('kode', 'nama', 'nama_ketua_dpw', 'ttd_ketua')
     },
   })
 }
@@ -50,6 +51,21 @@ function submit() {
       <h1 class="text-2xl font-bold mb-4">Tambah DPW Provinsi</h1>
 
       <form @submit.prevent="submit" class="space-y-4">
+        <div>
+          <label for="kode" class="block font-medium mb-1">Kode DPW</label>
+          <input
+            id="kode"
+            v-model="form.kode"
+            type="text"
+            maxlength="2"
+            class="w-full border px-3 py-2 rounded"
+            :class="{ 'border-red-500': form.errors.kode }"
+          />
+          <div v-if="form.errors.kode" class="text-red-600 text-sm mt-1">
+            {{ form.errors.kode }}
+          </div>
+        </div>
+
         <!-- Nama Provinsi -->
         <div>
           <label for="nama" class="block font-medium mb-1">Nama Provinsi</label>

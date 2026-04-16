@@ -12,11 +12,14 @@ class Pagoruan extends Model
     protected $table = 'pagoruan';
 
     protected $fillable = [
+        'kode',
         'nama',
         'kecamatan_id',
         'alamat',
         'telepon',
+        'nama_pimpinan',
         'nama_pelatih',
+        'is_active',
     ];
 
     public function kecamatan()

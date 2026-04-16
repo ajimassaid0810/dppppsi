@@ -17,7 +17,6 @@ const form = useForm({
   email: '',
   password: '',
   password_confirmation: '',
-  role: 'admin_cabang'
 });
 
 // submit handler
@@ -96,10 +95,6 @@ const submit = () => {
           />
           <InputError :message="form.errors.password_confirmation" />
         </div>
-
-        <!-- Hidden Role -->
-        <input type="hidden" name="role" v-model="form.role" />
-
         <!-- Submit -->
         <Button type="submit" class="mt-2 w-full" :disabled="form.processing">
           <LoaderCircle

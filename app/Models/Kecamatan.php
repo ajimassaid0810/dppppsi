@@ -10,18 +10,30 @@ class Kecamatan extends Model
     use HasFactory;
 
     protected $table = 'kecamatan';
-    public $incrementing = false;
     protected $keyType = 'int';
 
-    protected $fillable = ['id','nama', 'kota_kab_id'];
+    protected $fillable = [
+        'kode',
+        'nama',
+        'kota_kab_id',
+        'nama_ketua_dpc',
+        'alamat_sekretariat',
+        'telepon',
+        'is_active',
+    ];
 
     public function kotaKab()
     {
         return $this->belongsTo(KotaKab::class, 'kota_kab_id');
     }
 
-    public function kelurahan()
+    public function pagoruan()
     {
-        return $this->hasMany(Kelurahan::class, 'kecamatan_id');
+        return $this->hasMany(Pagoruan::class, 'kecamatan_id');
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'kecamatan_id');
     }
 }
