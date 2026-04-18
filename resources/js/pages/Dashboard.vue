@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type AppPageProps, type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { ArrowRight, BookMarked, Building2, MapPinned, ShieldCheck, Sparkles, Users2 } from 'lucide-vue-next';
+import { ArrowRight, BookMarked, Building2, MapPinned, PanelsTopLeft, School, ShieldCheck, Sparkles, Users2 } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -33,6 +33,8 @@ const quickLinks = computed(() => {
         { title: 'DPW Provinsi', href: '/dpw-provinsi', icon: ShieldCheck, roles: ['superadmin', 'admin_dpp', 'admin_dpw'] },
         { title: 'DPD Kota/Kab', href: '/dpd-kota-kab', icon: Building2, roles: ['superadmin', 'admin_dpp', 'admin_dpw', 'admin_dpd'] },
         { title: 'DPC Kecamatan', href: '/dpc-kecamatan', icon: MapPinned, roles: ['superadmin', 'admin_dpp', 'admin_dpw', 'admin_dpd'] },
+        { title: 'Pagoruan', href: '/pagoruan', icon: School, roles: ['superadmin', 'admin_dpp', 'admin_dpw', 'admin_dpd', 'admin_dpc'] },
+        { title: 'Landing CMS', href: '/landing-cms', icon: PanelsTopLeft, roles: ['superadmin'] },
     ];
 
     return items.filter((item) => item.roles.includes(roleName.value));

@@ -1,4 +1,6 @@
 <template>
+  <Head title="Print Kartu Anggota" />
+
   <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
     <div id="print-area">
       <div class="cards-container">
@@ -64,13 +66,16 @@
         </div>
       </div>
 
-      <button @click="window.print()" class="btn-print">Cetak</button>
+      <div class="action-row">
+        <button type="button" @click="printCard" class="btn-print">Cetak</button>
+        <button type="button" @click="goBack" class="btn-print btn-secondary">Kembali</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3'
+import { Head, usePage } from '@inertiajs/vue3'
 import QrcodeVue from 'qrcode.vue'
 
 interface Anggota {
@@ -102,9 +107,35 @@ const dpwTtdUrl =
 const logoUrl = '/storage/images/logo.png'
 const frontBackgroundUrl = '/storage/images/front.png'
 const backBackgroundUrl = '/storage/images/back.png'
+
+function printCard() {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.print()
+}
+
+function goBack() {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.history.back()
+}
 </script>
 
 <style>
+@page {
+  size: landscape;
+  margin: 8mm;
+}
+
+body {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
 #print-area {
   display: flex;
   flex-direction: column;
@@ -313,12 +344,22 @@ const backBackgroundUrl = '/storage/images/back.png'
 }
 
 .btn-print {
-  margin-top: 20px;
   padding: 10px 20px;
   border-radius: 8px;
   background: #333;
   color: white;
   cursor: pointer;
+  border: 0;
+}
+
+.btn-secondary {
+  background: #0b6b31;
+}
+
+.action-row {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
 }
 
 .img-ttd{
@@ -330,7 +371,7 @@ const backBackgroundUrl = '/storage/images/back.png'
 
 
 @media print {
-  .btn-print {
+  .action-row {
     display: none;
   }
 

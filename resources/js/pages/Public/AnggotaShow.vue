@@ -28,6 +28,7 @@ const props = defineProps<{
 
 function statusLabel(status: string) {
   const labels: Record<string, string> = {
+    Pengajuan_anggota: 'Pengajuan Anggota',
     draft_dpd: 'Draft DPD',
     diajukan_ke_dpw: 'Diajukan ke DPW',
     diverifikasi_dpw: 'Diverifikasi DPW',
@@ -41,6 +42,7 @@ function statusLabel(status: string) {
 
 function statusClass(status: string) {
   const classes: Record<string, string> = {
+    Pengajuan_anggota: 'bg-violet-100 text-violet-700',
     draft_dpd: 'bg-slate-100 text-slate-700',
     diajukan_ke_dpw: 'bg-amber-100 text-amber-700',
     diverifikasi_dpw: 'bg-emerald-100 text-emerald-700',

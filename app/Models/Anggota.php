@@ -10,6 +10,28 @@ class Anggota extends Model
 {
     use HasFactory, HasUuids;
 
+    public const JENIS_IDENTITAS_OPTIONS = [
+        'ktp' => 'KTP',
+        'kartu_pelajar' => 'Kartu Pelajar',
+    ];
+
+    public const GOLONGAN_DARAH_OPTIONS = [
+        'A' => 'A',
+        'B' => 'B',
+        'AB' => 'AB',
+        'O' => 'O',
+    ];
+
+    public const STATUS_PENGAJUAN_OPTIONS = [
+        'Pengajuan_anggota' => 'Pengajuan Anggota',
+        'draft_dpd' => 'Draft DPD',
+        'diajukan_ke_dpw' => 'Diajukan ke DPW',
+        'diverifikasi_dpw' => 'Diverifikasi DPW',
+        'diajukan_ke_dpp' => 'Diajukan ke DPP',
+        'disetujui_dpp' => 'Disetujui DPP',
+        'ditolak' => 'Ditolak',
+    ];
+
     protected $table = 'anggota';
     protected $primaryKey = 'id';
     public $incrementing = false;

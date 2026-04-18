@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes';
 import { type AppPageProps, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookMarked, Building2, LayoutGrid, MapPinned, ShieldCheck } from 'lucide-vue-next';
+import { BookMarked, Building2, LayoutGrid, MapPinned, PanelsTopLeft, School, ShieldCheck } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
@@ -52,6 +52,22 @@ const mainNavItems = computed<NavItem[]>(() => {
                 icon: MapPinned,
             },
         );
+    }
+
+    if (canAccess('superadmin', 'admin_dpp', 'admin_dpw', 'admin_dpd', 'admin_dpc')) {
+        items.push({
+            title: 'Pagoruan',
+            href: '/pagoruan',
+            icon: School,
+        });
+    }
+
+    if (canAccess('superadmin')) {
+        items.push({
+            title: 'Landing CMS',
+            href: '/landing-cms',
+            icon: PanelsTopLeft,
+        });
     }
 
     return items;
